@@ -15,7 +15,7 @@ A mobile-friendly property location page that displays a set of property tiles, 
 - Clone this GitHub repository to your local machine using the following command:
 
 ```bash
-  git clone 
+  git clone -b Task-1 https://github.com/FahimHaider19/W3EngineersInternship.git
 ```
 - Simply double-click on the HTML file you want to view, and it will automatically open in your default web browser. Alternatively, you can right-click on the HTML file, select "Open With," and choose your preferred web browser.
 
