@@ -29,5 +29,5 @@ A mobile-friendly property location page that displays a set of property tiles, 
 
 #### Live Link
 
-Insert gif or link to demo
+https://gentle-pastelito-5fd018.netlify.app/
 
