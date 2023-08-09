@@ -3,70 +3,93 @@
 
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="style.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">	
 	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />	
+	
 	<title>Task-1</title>
 </head>
 
-<body class="grid place-items-center">
-	<nav class="relative flex gap-1 p-1 sm:p-5 w-full max-w-7xl lg:max-w-none">
+<body class="grid align-center items-center relative">
+	<nav class="relative flex flex-col sm:flex-row justify-center gap-1 p-1 sm:p-5 w-full max-w-7xl lg:max-w-none">
 		<div class="relative outline-1 border-2">
 			<img class="absolute h-6 m-2" src="./public/icons/search.png" alt="">
-			<input class="outline-none ml-8 p-2" type="text" placeholder="Texus, USA">
+			<input id="searchInput" class="outline-none ml-8 p-2" type="text" placeholder="Texus, USA" onkeyup="search(this.value)">
+			<div class="absolute flex flex-col place-items-center w-full h-fit bg-gray-100 rounded-b-md mt-1">
+				<ul id="searchSuggestions" class="w-full">
+				</ul>
+			</div>
 		</div>
 		<div class="relative flex outline-1 border-2">
 			<div>
 				<img class="absolute h-6 m-2 mr-0" src="./public/icons/calendar.png" alt="">
-				<input class="outline-none ml-5 p-2 pr-0 w-36 text-center tracking-widest focus:tracking-tight" onfocus="(this.type='date')" onblur="(this.type='text')" type="text" placeholder="Check In">
+				<input id="input-checkin" class="outline-none ml-5 p-2 pr-0 w-36 text-center tracking-widest focus:tracking-tight" onfocus="(this.type='date')" onblur="(this.type='text')" type="text" placeholder="Check In">
 			</div>
 			<div>
 				<img class="absolute h-6 my-2" src="./public/icons/chevron-right.png" alt="">
 			</div>
 			<div>
-				<input class="outline-none ml-4 p-2 pl-0 w-36 text-center" onfocus="(this.type='date')" onblur="(this.type='text')" type="text" placeholder="Check Out">
+				<input id="input-checkout" class="outline-none ml-4 p-2 pl-0 w-36 text-center" onfocus="(this.type='date')" onblur="(this.type='text')" type="text" placeholder="Check Out">
 			</div>
 		</div>
 		<div class="flex gap-1"> 
 			<div class="relative outline-1 border-2">
-				<div onclick="(alert('gg'))">
-				<img class="absolute h-6 m-2" src="./public/icons/person.png" alt="">
-				<input class="outline-none ml-8 p-2 cursor-pointer" readonly type="text" placeholder="Guests">
-				<img class="absolute h-6 m-2 right-0 top-0" src="./public/icons/chevron-down.png" alt="">
+				<div onclick="showGuestsMenu()">
+					<img class="absolute h-6 m-2" src="./public/icons/person.png" alt="">
+					<input id="guestsInput" class="outline-none ml-8 p-2 pl-0 w-44 cursor-pointer text-center" readonly type="text" placeholder="Guests">
+					<img class="absolute h-6 m-2 right-0 top-0" src="./public/icons/chevron-down.png" alt="">
 				</div>
-				<div class="absolute flex flex-col place-items-center w-full h-fit bg-gray-100 rounded-b-md mt-1 py-4">
-					<div class="flex justify-center items-center gap-6 w-full">
+				<div id="menu-guests" class="invisible absolute flex flex-col place-items-center w-full h-fit bg-gray-100 rounded-b-md mt-1 py-4">
+					<div class="flex justify-center items-center gap-4 w-full">
 						<div>Guests:</div>
-						<button><img class="h-10" src="./public/icons/minus.png" alt=""></button>
-						<div>0</div>
-						<button><img class="h-10" src="./public/icons/plus.png" alt=""></button>
+						<button onclick="reduceGuest()"><img class="h-10" src="./public/icons/minus.png" alt=""></button>
+						<div id="numOfGuests">0</div>
+						<button onclick="addGuest()"><img class="h-10" src="./public/icons/plus.png" alt=""></button>
 					</div>
-					<button class="self-end px-5 py-2 mt-4 mr-4 bg-amber-500 rounded-lg">Apply</button>
+					<button id="guestsApply" class="self-end px-5 py-2 mt-4 mr-4 bg-amber-500 rounded-lg" onclick="ApplyGuest()">Apply</button>
 				</div>
 				
 			</div>
 			<div class="relative outline-1 border-2">
-				<div onclick="(alert('gg'))">
-				<input class="outline-none ml-4 p-2 cursor-pointer" readonly type="text" placeholder="Price Range">
+				<div onclick="showRangeMenu()">
+				<input id="rangeInput" class="outline-none p-2 w-48 cursor-pointer text-center" readonly type="text" placeholder="Price Range">
 				<img class="absolute h-6 m-2 right-0 top-0" src="./public/icons/chevron-down.png" alt="">
-				</div>
-				<div class="absolute flex flex-col place-items-center w-full h-fit bg-gray-100 rounded-b-md mt-1 py-4">
-					<div class="flex justify-center items-center gap-6 w-full">
-						<div>Guests:</div>
-						<button><img class="h-10" src="./public/icons/minus.png" alt=""></button>
-						<div>0</div>
-						<button><img class="h-10" src="./public/icons/plus.png" alt=""></button>
+			</div>
+			<div id="menu-range" class="invisible absolute flex flex-col place-items-center w-full h-fit bg-gray-100 rounded-b-md mt-1 p-4">
+				<div class="relative w-full rounded-md">
+					<div class="relative py-3 rounded-md text-center text-gray-700 text-xl">
+						<span id="range1">
+							0
+						</span>
+						<span> &dash; </span>
+						<span id="range2">
+							100
+						</span>
 					</div>
-					<button class="self-end px-5 py-2 mt-4 mr-4 bg-amber-500 rounded-lg">Apply</button>
+					<div class="container mt-16">
+						<div class="slider-track"></div>
+						<input type="range" min="0" max="99999" value="0" id="slider-1" oninput="slideOne()">
+						<input type="range" min="0" max="99999" value="99999" id="slider-2" oninput="slideTwo()">
+						<button id="guestsApply" class="w-full self-end px-5 py-2 mt-4 mr-4 bg-amber-500 rounded-lg" onclick="ApplyRange()">Apply</button>
+					</div>
 				</div>
-				
 			</div>
 		</div>
+		<button id="guestsApply" class="w-full h-full self-end px-5 py-2 mt-4 mr-4 bg-amber-500 rounded-sm" onclick="ShowSearchAttributes()">Apply</button>
 	</nav>
 
-	<div class="max-w-7xl">
-
+	<!-- <div>
+		<button id="showMapButton" class="w-full h-full self-end px-5 py-2 mt-4 mr-4 bg-amber-500 rounded-sm" onclick="">Show Map</button>
+	</div> -->
+	
+	<div id="map" class="w-full h-full absolute">
+		
+		<div id="map" class="h-screen w-screen" ></div>
 	</div>
+
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+	<script src="./script.js"></script>
 </body>
 
 </html>
