@@ -5,6 +5,9 @@ fetch('./cities.json')
 console.log(cities)
 
 let guest = 0
+let latitude = -99
+let longitude = -99
+let properties = []
 
 function datehandler() {
     
@@ -39,21 +42,23 @@ function ApplyRange() {
     document.getElementById('menu-range').classList.add('invisible')
 }
 
-function selectLocation(value) {
+function selectLocation(value, lat, lng) {
     document.getElementById('searchInput').value = value
     document.getElementById('searchSuggestions').innerHTML = ''
+    latitude = lat
+    longitude = lng
+    generateProperty()
 }
 
 async function search(keyword) {
     if(keyword.length >= 3) {
         const filteredCities = cities.filter(c => c.name.match(new RegExp(keyword, 'gi')))
         console.log(filteredCities)
-        const html = filteredCities.slice(0, 5).map(location=> {return(`<li class="h-10 px-5 p-2 bg-gray-200 hover:bg-gray-300" onClick="selectLocation('${location.name}, ${location.country}')">${location.name}, ${location.country}</li>`)}).join(' ')
+        const html = filteredCities.slice(0, 5).map(location=> {return(`<li lat="${location.lat}" lng="${location.lng}" class="h-10 px-5 p-2 bg-gray-200 hover:bg-gray-300" onClick="selectLocation('${location.name}, ${location.country}', ${location.lat}, ${location.lng})">${location.name}, ${location.country}</li>`)}).join(' ')
         document.getElementById('searchSuggestions').innerHTML = html
     }
     else document.getElementById('searchSuggestions').innerHTML = ''
 }
-
 
 
 window.onload = function(){
@@ -99,8 +104,24 @@ Price range: ${document.getElementById('rangeInput').value}
     `)
 }
 
+function ShowMap() {
+    if(document.getElementById('searchInput').value.length >= 3 && latitude != -99 && longitude != -99) {
+        map.setView([latitude, longitude], 13)
+        properties.map(property => {
+            if(property.price <= document.getElementById('slider-2').value && property.price >= document.getElementById('slider-1').value)
+                L.tooltip().setLatLng([property.lat, property.lng]).setContent(property.name+'<br>Price:'+property.price).addTo(map);
+        })
+        document.getElementsByTagName('nav')[0].style.display = 'none'
+        document.getElementById('map').classList.remove('invisible')
+        document.getElementById('div-button').style.display = 'none'
+    }
+    else alert('Please select a location. If you have already typed a location yourself, please reselect it from the suggestions.')
+}
+
 function HideMap() { 
+    document.getElementById('div-button').style.display = 'flex'
     document.getElementById('map').classList.add('invisible')
+    document.getElementsByTagName('nav')[0].style.display = 'flex'
 }
 
 
@@ -121,3 +142,20 @@ button.onAdd = function() {
     return div
 }
 button.addTo(map)
+
+function generateProperty() {
+    properties = []
+    maxProperty = 25
+    minProperty = 10
+    numOfProperty = Math.floor(Math.random() * (maxProperty - minProperty) ) + minProperty;
+    for(let i=0; i<numOfProperty; i++) {
+        let property = {
+            lat: latitude+(Math.random() * (-0.01 - (-0.02)) + (-0.02)),
+            lng: longitude+(Math.random() * (-0.01 - (-0.02)) + (-0.02)),
+            name: 'Property ' + i,
+            price: Math.floor(Math.random() * (9999 - 1000) ) + 1000,
+        }
+        properties.push(property)
+    }
+    console.log(properties)
+}
